@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/minute/db" VERSION="20260912" COMMENT="XMLDB file for mod_minute"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+  <TABLES>
+    <TABLE NAME="minute" COMMENT="One-minute paper activity instances">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="intro" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="prompt" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timestart" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timeend" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="maxchars" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="500" SEQUENCE="false"/>
+        <FIELD NAME="requireip" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="teacherip" TYPE="char" LENGTH="45" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="requirelocation" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="referencelat" TYPE="number" LENGTH="10" NOTNULL="false" SEQUENCE="false" DECIMALS="7"/>
+        <FIELD NAME="referencelon" TYPE="number" LENGTH="10" NOTNULL="false" SEQUENCE="false" DECIMALS="7"/>
+        <FIELD NAME="radiusmeters" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="100" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="course" TYPE="foreign" FIELDS="course" REFTABLE="course" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="minute_responses" COMMENT="Student responses to One-minute paper activities">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="minuteid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="response" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="ipaddress" TYPE="char" LENGTH="45" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="latitude" TYPE="number" LENGTH="10" NOTNULL="false" SEQUENCE="false" DECIMALS="7"/>
+        <FIELD NAME="longitude" TYPE="number" LENGTH="10" NOTNULL="false" SEQUENCE="false" DECIMALS="7"/>
+        <FIELD NAME="accuracy" TYPE="number" LENGTH="10" NOTNULL="false" SEQUENCE="false" DECIMALS="2"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="minute" TYPE="foreign" FIELDS="minuteid" REFTABLE="minute" REFFIELDS="id"/>
+        <KEY NAME="user" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="minuteuser" UNIQUE="true" FIELDS="minuteid, userid"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>
