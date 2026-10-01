@@ -43,12 +43,12 @@ class submission_manager {
      * @return stdClass
      */
     public static function save(
-        stdClass       $minute,
+        stdClass $minute,
         context_module $context,
-        string          $response,
-        ?float          $latitude,
-        ?float          $longitude,
-        ?float          $accuracy
+        string $response,
+        ?float $latitude,
+        ?float $longitude,
+        ?float $accuracy
     ): stdClass {
         global $DB, $USER;
 
