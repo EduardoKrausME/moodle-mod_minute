@@ -22,7 +22,10 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use core\output\notification;
 use mod_minute\access_manager;
+use mod_minute\event\course_module_viewed;
+use mod_minute\presence_manager;
 use mod_minute\submission_manager;
 
 require_once("../../config.php");
@@ -79,34 +82,34 @@ if ($action !== "") {
             new moodle_url("/mod/minute/view.php", ["id" => $cm->id]),
             get_string("responsesaved", "mod_minute"),
             null,
-            \core\output\notification::NOTIFY_SUCCESS
+            notification::NOTIFY_SUCCESS
         );
     }
 
     if ($action === "captureip") {
-        \mod_minute\presence_manager::capture_ip($minute, $context);
+        presence_manager::capture_ip($minute, $context);
         redirect(
             new moodle_url("/mod/minute/view.php", ["id" => $cm->id]),
             get_string("ipcaptured", "mod_minute"),
             null,
-            \core\output\notification::NOTIFY_SUCCESS
+            notification::NOTIFY_SUCCESS
         );
     }
 
     if ($action === "capturelocation") {
         $latitude = required_param("latitude", PARAM_FLOAT);
         $longitude = required_param("longitude", PARAM_FLOAT);
-        \mod_minute\presence_manager::capture_location($minute, $context, $latitude, $longitude);
+        presence_manager::capture_location($minute, $context, $latitude, $longitude);
         redirect(
             new moodle_url("/mod/minute/view.php", ["id" => $cm->id]),
             get_string("teacherlocationcaptured", "mod_minute"),
             null,
-            \core\output\notification::NOTIFY_SUCCESS
+            notification::NOTIFY_SUCCESS
         );
     }
 }
 
-$event = \mod_minute\event\course_module_viewed::create([
+$event = course_module_viewed::create([
     "objectid" => $minute->id,
     "context" => $context,
 ]);

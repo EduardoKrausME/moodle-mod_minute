@@ -22,6 +22,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_minute\access_manager;
+use mod_minute\report_manager;
+
 require_once("../../config.php");
 require_once($CFG->libdir . "/tablelib.php");
 require_once($CFG->libdir . "/csvlib.class.php");
@@ -44,7 +47,7 @@ $PAGE->set_context($context);
 
 $groupmode = groups_get_activity_groupmode($cm);
 $currentgroup = $groupmode ? groups_get_activity_group($cm, true) : 0;
-$responses = \mod_minute\report_manager::get_responses($minute, $currentgroup);
+$responses = report_manager::get_responses($minute, $currentgroup);
 
 if ($download === "csv") {
     $filename = clean_filename($minute->name . "-" . get_string("responses", "mod_minute"));
@@ -82,8 +85,8 @@ if ($download === "csv") {
             $row[] = $response->accuracy;
             $distance = "";
             if ($response->latitude !== null && $response->longitude !== null
-                    && $minute->referencelat !== null && $minute->referencelon !== null) {
-                $distance = round(\mod_minute\access_manager::distance_meters(
+                && $minute->referencelat !== null && $minute->referencelon !== null) {
+                $distance = round(access_manager::distance_meters(
                     (float)$minute->referencelat,
                     (float)$minute->referencelon,
                     (float)$response->latitude,
@@ -145,7 +148,7 @@ foreach ($responses as $response) {
             $row[] = $location;
 
             if ($minute->referencelat !== null && $minute->referencelon !== null) {
-                $distance = \mod_minute\access_manager::distance_meters(
+                $distance = access_manager::distance_meters(
                     (float)$minute->referencelat,
                     (float)$minute->referencelon,
                     (float)$response->latitude,

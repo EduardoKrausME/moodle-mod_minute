@@ -16,6 +16,8 @@
 
 namespace mod_minute;
 
+use stdClass;
+
 /**
  * Activity instance persistence.
  *
@@ -27,10 +29,10 @@ class instance_manager {
     /**
      * Add an instance.
      *
-     * @param \stdClass $data Form data.
+     * @param stdClass $data Form data.
      * @return int
      */
-    public static function add(\stdClass $data): int {
+    public static function add(stdClass $data): int {
         global $DB;
 
         $now = time();
@@ -45,10 +47,10 @@ class instance_manager {
     /**
      * Update an instance.
      *
-     * @param \stdClass $data Form data.
+     * @param stdClass $data Form data.
      * @return bool
      */
-    public static function update(\stdClass $data): bool {
+    public static function update(stdClass $data): bool {
         global $DB;
 
         $data->id = $data->instance;
@@ -83,10 +85,10 @@ class instance_manager {
     /**
      * Ensure the teacher IP is usable when IP restriction is enabled.
      *
-     * @param \stdClass $data Form data.
+     * @param stdClass $data Form data.
      * @return string
      */
-    private static function normalise_teacher_ip(\stdClass $data): string {
+    private static function normalise_teacher_ip(stdClass $data): string {
         if (empty($data->requireip)) {
             return "";
         }
@@ -102,10 +104,10 @@ class instance_manager {
     /**
      * Clear irrelevant location values when location is disabled.
      *
-     * @param \stdClass $data Form data.
+     * @param stdClass $data Form data.
      * @return void
      */
-    private static function normalise_location(\stdClass $data): void {
+    private static function normalise_location(stdClass $data): void {
         if (empty($data->requirelocation)) {
             $data->referencelat = null;
             $data->referencelon = null;

@@ -16,6 +16,13 @@
 
 namespace mod_minute;
 
+use context_module;
+use core_text;
+use mod_minute\event\response_submitted;
+use mod_minute\event\response_updated;
+use moodle_exception;
+use stdClass;
+
 /**
  * Response persistence and validation.
  *
@@ -27,36 +34,36 @@ class submission_manager {
     /**
      * Save the current user's response.
      *
-     * @param \stdClass $minute Activity instance.
-     * @param \context_module $context Module context.
+     * @param stdClass $minute Activity instance.
+     * @param context_module $context Module context.
      * @param string $response Response text.
      * @param float|null $latitude Latitude.
      * @param float|null $longitude Longitude.
      * @param float|null $accuracy Browser-reported location accuracy.
-     * @return \stdClass
+     * @return stdClass
      */
     public static function save(
-        \stdClass $minute,
-        \context_module $context,
-        string $response,
-        ?float $latitude,
-        ?float $longitude,
-        ?float $accuracy
-    ): \stdClass {
+        stdClass       $minute,
+        context_module $context,
+        string          $response,
+        ?float          $latitude,
+        ?float          $longitude,
+        ?float          $accuracy
+    ): stdClass {
         global $DB, $USER;
 
         require_capability("mod/minute:submit", $context);
 
         if (!access_manager::is_open($minute)) {
-            throw new \moodle_exception("submissionclosed", "mod_minute");
+            throw new moodle_exception("submissionclosed", "mod_minute");
         }
 
         $response = trim(clean_param($response, PARAM_TEXT));
         if ($response === "") {
-            throw new \moodle_exception("responseempty", "mod_minute");
+            throw new moodle_exception("responseempty", "mod_minute");
         }
-        if (\core_text::strlen($response) > (int)$minute->maxchars) {
-            throw new \moodle_exception("responsetoolong", "mod_minute", "", (int)$minute->maxchars);
+        if (core_text::strlen($response) > (int)$minute->maxchars) {
+            throw new moodle_exception("responsetoolong", "mod_minute", "", (int)$minute->maxchars);
         }
 
         self::validate_coordinates($latitude, $longitude, $accuracy);
@@ -101,8 +108,8 @@ class submission_manager {
         }
 
         $eventclass = $created
-            ? \mod_minute\event\response_submitted::class
-            : \mod_minute\event\response_updated::class;
+            ? response_submitted::class
+            : response_updated::class;
         $event = $eventclass::create([
             "objectid" => $record->id,
             "context" => $context,
@@ -118,9 +125,9 @@ class submission_manager {
      *
      * @param int $minuteid Activity id.
      * @param int $userid User id.
-     * @return \stdClass|null
+     * @return stdClass|null
      */
-    public static function get_for_user(int $minuteid, int $userid): ?\stdClass {
+    public static function get_for_user(int $minuteid, int $userid): ?stdClass {
         global $DB;
 
         $record = $DB->get_record("minute_responses", ["minuteid" => $minuteid, "userid" => $userid]);
@@ -137,13 +144,13 @@ class submission_manager {
      */
     private static function validate_coordinates(?float $latitude, ?float $longitude, ?float $accuracy): void {
         if ($latitude !== null && ($latitude < -90 || $latitude > 90)) {
-            throw new \moodle_exception("errorlatitude", "mod_minute");
+            throw new moodle_exception("errorlatitude", "mod_minute");
         }
         if ($longitude !== null && ($longitude < -180 || $longitude > 180)) {
-            throw new \moodle_exception("errorlongitude", "mod_minute");
+            throw new moodle_exception("errorlongitude", "mod_minute");
         }
         if ($accuracy !== null && $accuracy < 0) {
-            throw new \moodle_exception("erroraccuracy", "mod_minute");
+            throw new moodle_exception("erroraccuracy", "mod_minute");
         }
     }
 }

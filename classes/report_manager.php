@@ -16,6 +16,8 @@
 
 namespace mod_minute;
 
+use stdClass;
+
 /**
  * Report data retrieval.
  *
@@ -27,11 +29,11 @@ class report_manager {
     /**
      * Fetch responses, respecting the current activity group when one is selected.
      *
-     * @param \stdClass $minute Activity instance.
+     * @param stdClass $minute Activity instance.
      * @param int $groupid Group id, or 0 for all visible groups.
      * @return array
      */
-    public static function get_responses(\stdClass $minute, int $groupid = 0): array {
+    public static function get_responses(stdClass $minute, int $groupid = 0): array {
         global $DB;
 
         $params = ["minuteid" => $minute->id];

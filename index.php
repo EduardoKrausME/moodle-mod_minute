@@ -22,6 +22,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_minute\access_manager;
+
 require_once("../../config.php");
 
 $id = required_param("id", PARAM_INT);
@@ -49,7 +51,7 @@ $table->head = [get_string("name"), get_string("status", "mod_minute")];
 foreach ($instances as $instance) {
     $url = new moodle_url("/mod/minute/view.php", ["id" => $instance->coursemodule]);
     $minute = $DB->get_record("minute", ["id" => $instance->id], "timestart,timeend", MUST_EXIST);
-    $status = \mod_minute\access_manager::is_open($minute)
+    $status = access_manager::is_open($minute)
         ? get_string("open", "mod_minute")
         : get_string("closed", "mod_minute");
     $table->data[] = [html_writer::link($url, format_string($instance->name)), $status];

@@ -24,6 +24,8 @@ Features:
 
 ## Presence validation notes
 
-IP comparison uses the client IP detected by Moodle. Sites behind reverse proxies must configure Moodle and the proxy correctly, otherwise all users may appear with the proxy address.
+IP comparison uses the client IP detected by Moodle. Sites behind reverse proxies must configure Moodle and the proxy
+correctly, otherwise all users may appear with the proxy address.
 
-Browser geolocation is not a cryptographic proof of physical presence. It is useful as a classroom check, but device/browser location can be unavailable or manipulated on a compromised client.
+Browser geolocation is not a cryptographic proof of physical presence. It is useful as a classroom check, but
+device/browser location can be unavailable or manipulated on a compromised client.

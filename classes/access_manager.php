@@ -16,6 +16,9 @@
 
 namespace mod_minute;
 
+use moodle_exception;
+use stdClass;
+
 /**
  * Time, IP and geolocation access rules.
  *
@@ -27,11 +30,11 @@ class access_manager {
     /**
      * Whether responses are currently accepted.
      *
-     * @param \stdClass $minute Activity instance.
+     * @param stdClass $minute Activity instance.
      * @param int|null $now Timestamp.
      * @return bool
      */
-    public static function is_open(\stdClass $minute, ?int $now = null): bool {
+    public static function is_open(stdClass $minute, ?int $now = null): bool {
         $now ??= time();
 
         if (!empty($minute->timestart) && $now < (int)$minute->timestart) {
@@ -47,11 +50,11 @@ class access_manager {
     /**
      * Explain a closed window.
      *
-     * @param \stdClass $minute Activity instance.
+     * @param stdClass $minute Activity instance.
      * @param int|null $now Timestamp.
      * @return string
      */
-    public static function get_window_message(\stdClass $minute, ?int $now = null): string {
+    public static function get_window_message(stdClass $minute, ?int $now = null): string {
         $now ??= time();
 
         if (!empty($minute->timestart) && $now < (int)$minute->timestart) {
@@ -67,25 +70,25 @@ class access_manager {
     /**
      * Validate presence rules for a response.
      *
-     * @param \stdClass $minute Activity instance.
+     * @param stdClass $minute Activity instance.
      * @param float|null $latitude Student latitude.
      * @param float|null $longitude Student longitude.
      * @return void
      */
-    public static function validate_presence(\stdClass $minute, ?float $latitude, ?float $longitude): void {
+    public static function validate_presence(stdClass $minute, ?float $latitude, ?float $longitude): void {
         if (!empty($minute->requireip)) {
             $currentip = getremoteaddr();
             if (empty($minute->teacherip) || !hash_equals((string)$minute->teacherip, (string)$currentip)) {
-                throw new \moodle_exception("ipnotallowed", "mod_minute");
+                throw new moodle_exception("ipnotallowed", "mod_minute");
             }
         }
 
         if (!empty($minute->requirelocation)) {
             if ($latitude === null || $longitude === null) {
-                throw new \moodle_exception("locationrequired", "mod_minute");
+                throw new moodle_exception("locationrequired", "mod_minute");
             }
             if ($minute->referencelat === null || $minute->referencelon === null) {
-                throw new \moodle_exception("locationnotconfigured", "mod_minute");
+                throw new moodle_exception("locationnotconfigured", "mod_minute");
             }
 
             $distance = self::distance_meters(
@@ -95,7 +98,7 @@ class access_manager {
                 $longitude
             );
             if ($distance > (int)$minute->radiusmeters) {
-                throw new \moodle_exception("locationoutsideradius", "mod_minute", "", (object)[
+                throw new moodle_exception("locationoutsideradius", "mod_minute", "", (object)[
                     "distance" => round($distance),
                     "radius" => (int)$minute->radiusmeters,
                 ]);

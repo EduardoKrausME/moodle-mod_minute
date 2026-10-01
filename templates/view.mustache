@@ -57,7 +57,8 @@
                             <input type="hidden" name="id" value="{{id}}">
                             <input type="hidden" name="action" value="captureip">
                             <input type="hidden" name="sesskey" value="{{sesskey}}">
-                            <button type="submit" class="btn btn-sm btn-secondary">{{#str}}usecurrentip, mod_minute{{/str}}</button>
+                            <button type="submit" class="btn btn-sm btn-secondary">{{#str}}
+                                usecurrentip, mod_minute{{/str}}</button>
                         </form>
                     </div>
                 {{/requireip}}
@@ -67,7 +68,8 @@
                         <strong>{{#str}}locationrestriction, mod_minute{{/str}}</strong>
                         <div class="small text-muted mb-2">
                             {{#hasreferencelocation}}{{referencelocationtext}} · {{radiustext}}{{/hasreferencelocation}}
-                            {{^hasreferencelocation}}{{#str}}locationnotconfiguredteacher, mod_minute{{/str}}{{/hasreferencelocation}}
+                            {{^hasreferencelocation}}{{#str}}
+                                locationnotconfiguredteacher, mod_minute{{/str}}{{/hasreferencelocation}}
                         </div>
                         <form id="minute-teacher-location-form" method="post" action="{{actionurl}}">
                             <input type="hidden" name="id" value="{{id}}">
@@ -75,7 +77,8 @@
                             <input type="hidden" name="sesskey" value="{{sesskey}}">
                             <input type="hidden" id="minute-teacher-latitude" name="latitude" value="">
                             <input type="hidden" id="minute-teacher-longitude" name="longitude" value="">
-                            <button type="button" id="minute-teacher-location" class="btn btn-sm btn-secondary">{{#str}}usecurrentlocation, mod_minute{{/str}}</button>
+                            <button type="button" id="minute-teacher-location" class="btn btn-sm btn-secondary">{{#str}}
+                                usecurrentlocation, mod_minute{{/str}}</button>
                             <span id="minute-teacher-location-status" class="small text-muted ms-2"></span>
                         </form>
                     </div>
@@ -95,8 +98,10 @@
                     <input type="hidden" id="minute-longitude" name="longitude" value="">
                     <input type="hidden" id="minute-accuracy" name="accuracy" value="">
 
-                    <label for="minute-response" class="form-label fw-bold">{{#str}}yourresponse, mod_minute{{/str}}</label>
-                    <textarea id="minute-response" name="response" class="form-control" rows="5" maxlength="{{maxchars}}" required>{{response}}</textarea>
+                    <label for="minute-response" class="form-label fw-bold">{{#str}}
+                        yourresponse, mod_minute{{/str}}</label>
+                    <textarea id="minute-response" name="response" class="form-control" rows="5"
+                              maxlength="{{maxchars}}" required>{{response}}</textarea>
                     <div class="form-text">{{characterlimittext}}</div>
 
                     {{#requireip}}
@@ -105,13 +110,15 @@
 
                     {{#requirelocation}}
                         <div class="mt-3">
-                            <button type="button" id="minute-capture-location" class="btn btn-outline-secondary">{{#str}}sharelocation, mod_minute{{/str}}</button>
+                            <button type="button" id="minute-capture-location"
+                                    class="btn btn-outline-secondary">{{#str}}sharelocation, mod_minute{{/str}}</button>
                             <span id="minute-location-status" class="small text-muted ms-2"></span>
                         </div>
                     {{/requirelocation}}
 
                     <div class="mt-3 d-flex align-items-center gap-3">
-                        <button type="submit" id="minute-submit" class="btn btn-primary" {{#requirelocation}}disabled{{/requirelocation}}>
+                        <button type="submit" id="minute-submit" class="btn btn-primary"
+                                {{#requirelocation}}disabled{{/requirelocation}}>
                             {{#hassubmission}}{{#str}}updateresponse, mod_minute{{/str}}{{/hassubmission}}
                             {{^hassubmission}}{{#str}}submitresponse, mod_minute{{/str}}{{/hassubmission}}
                         </button>

@@ -22,6 +22,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_minute\instance_manager;
+
 /**
  * Declare supported Moodle features.
  *
@@ -50,7 +52,7 @@ function minute_supports($feature) {
  * @return int
  */
 function minute_add_instance($data, $mform = null) {
-    return \mod_minute\instance_manager::add($data);
+    return instance_manager::add($data);
 }
 
 /**
@@ -61,7 +63,7 @@ function minute_add_instance($data, $mform = null) {
  * @return bool
  */
 function minute_update_instance($data, $mform = null) {
-    return \mod_minute\instance_manager::update($data);
+    return instance_manager::update($data);
 }
 
 /**
@@ -71,5 +73,5 @@ function minute_update_instance($data, $mform = null) {
  * @return bool
  */
 function minute_delete_instance($id) {
-    return \mod_minute\instance_manager::delete($id);
+    return instance_manager::delete($id);
 }

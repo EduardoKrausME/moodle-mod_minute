@@ -21,10 +21,10 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define(["jquery"], function($) {
+define(["jquery"], function ($) {
     "use strict";
 
-    var capture = function(config, callback) {
+    var capture = function (config, callback) {
         var status = $(config.status);
         status.text(config.strings.requesting);
 
@@ -33,7 +33,7 @@ define(["jquery"], function($) {
             return;
         }
 
-        navigator.geolocation.getCurrentPosition(function(position) {
+        navigator.geolocation.getCurrentPosition(function (position) {
             $(config.latitude).val(position.coords.latitude.toFixed(7));
             $(config.longitude).val(position.coords.longitude.toFixed(7));
             if (config.accuracy) {
@@ -41,7 +41,7 @@ define(["jquery"], function($) {
             }
             status.text(config.strings.captured);
             callback(position);
-        }, function() {
+        }, function () {
             status.text(config.strings.error);
         }, {
             enableHighAccuracy: true,
@@ -50,23 +50,24 @@ define(["jquery"], function($) {
         });
     };
 
-    var initSettings = function(config) {
-        $(config.button).on("click", function() {
-            capture(config, function() {});
+    var initSettings = function (config) {
+        $(config.button).on("click", function () {
+            capture(config, function () {
+            });
         });
     };
 
-    var initSubmission = function(config) {
-        $(config.button).on("click", function() {
-            capture(config, function() {
+    var initSubmission = function (config) {
+        $(config.button).on("click", function () {
+            capture(config, function () {
                 $(config.submit).prop("disabled", false);
             });
         });
     };
 
-    var initTeacherCapture = function(config) {
-        $(config.button).on("click", function() {
-            capture(config, function() {
+    var initTeacherCapture = function (config) {
+        $(config.button).on("click", function () {
+            capture(config, function () {
                 $(config.status).text(config.strings.captured);
                 $(config.form).trigger("submit");
             });

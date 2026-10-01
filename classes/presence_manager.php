@@ -16,6 +16,10 @@
 
 namespace mod_minute;
 
+use context_module;
+use moodle_exception;
+use stdClass;
+
 /**
  * Teacher presence reference management.
  *
@@ -27,11 +31,11 @@ class presence_manager {
     /**
      * Update the activity reference IP from the current request.
      *
-     * @param \stdClass $minute Activity instance.
-     * @param \context_module $context Module context.
+     * @param stdClass $minute Activity instance.
+     * @param context_module $context Module context.
      * @return string New IP.
      */
-    public static function capture_ip(\stdClass $minute, \context_module $context): string {
+    public static function capture_ip(stdClass $minute, context_module $context): string {
         global $DB;
 
         require_capability("mod/minute:viewreport", $context);
@@ -45,26 +49,26 @@ class presence_manager {
     /**
      * Update the activity reference location.
      *
-     * @param \stdClass $minute Activity instance.
-     * @param \context_module $context Module context.
+     * @param stdClass $minute Activity instance.
+     * @param context_module $context Module context.
      * @param float $latitude Latitude.
      * @param float $longitude Longitude.
      * @return void
      */
     public static function capture_location(
-        \stdClass $minute,
-        \context_module $context,
-        float $latitude,
-        float $longitude
+        stdClass       $minute,
+        context_module $context,
+        float           $latitude,
+        float           $longitude
     ): void {
         global $DB;
 
         require_capability("mod/minute:viewreport", $context);
         if ($latitude < -90 || $latitude > 90) {
-            throw new \moodle_exception("errorlatitude", "mod_minute");
+            throw new moodle_exception("errorlatitude", "mod_minute");
         }
         if ($longitude < -180 || $longitude > 180) {
-            throw new \moodle_exception("errorlongitude", "mod_minute");
+            throw new moodle_exception("errorlongitude", "mod_minute");
         }
 
         $DB->set_field("minute", "referencelat", $latitude, ["id" => $minute->id]);

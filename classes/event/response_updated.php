@@ -16,6 +16,9 @@
 
 namespace mod_minute\event;
 
+use core\event\base;
+use moodle_url;
+
 /**
  * Response updated event.
  *
@@ -23,7 +26,7 @@ namespace mod_minute\event;
  * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class response_updated extends \core\event\base {
+class response_updated extends base {
     /**
      * Initialise event data.
      *
@@ -57,9 +60,9 @@ class response_updated extends \core\event\base {
     /**
      * Related URL.
      *
-     * @return \moodle_url
+     * @return moodle_url
      */
     public function get_url() {
-        return new \moodle_url("/mod/minute/view.php", ["id" => $this->contextinstanceid]);
+        return new moodle_url("/mod/minute/view.php", ["id" => $this->contextinstanceid]);
     }
 }
