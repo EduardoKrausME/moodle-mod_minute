@@ -56,10 +56,10 @@ class presence_manager {
      * @return void
      */
     public static function capture_location(
-        stdClass       $minute,
+        stdClass $minute,
         context_module $context,
-        float           $latitude,
-        float           $longitude
+        float $latitude,
+        float $longitude
     ): void {
         global $DB;
 
