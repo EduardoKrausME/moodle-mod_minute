@@ -1,31 +1,24 @@
 # mod_minute - One-minute paper
 
-A small Moodle activity for the classic One-minute paper technique.
-
-Students answer a short prompt such as:
+A Moodle activity for the classic One-minute paper technique, where students answer a short reflection prompt such as:
 
 > In approximately one minute, write the main concept you learned.
 
-Features:
+## How it works
 
-- configurable response character limit;
-- optional opening and closing dates;
-- one editable response per participant while the activity is open;
-- teacher report with all responses and CSV export;
-- optional same-IP-as-teacher restriction;
-- optional browser geolocation restriction using a teacher reference point and radius;
-- group-aware report;
-- Privacy API support.
+The teacher defines the prompt, response limit and optional opening and closing dates. Each participant keeps one editable
+response while the activity is open, and the teacher can review all answers in a group-aware report or export them to
+CSV.
 
-## Requirements
+The activity can optionally restrict responses to the same detected IP as the teacher or to a geographic radius around a
+teacher reference point.
 
-- Moodle 4.5 or later.
-- HTTPS is normally required by browsers when geolocation is enabled.
+## Presence validation
 
-## Presence validation notes
+IP comparison uses the client IP detected by Moodle, so environments behind reverse proxies need their normal proxy
+configuration to expose the appropriate client address.
 
-IP comparison uses the client IP detected by Moodle. Sites behind reverse proxies must configure Moodle and the proxy
-correctly, otherwise all users may appear with the proxy address.
+Browser geolocation is a classroom validation aid rather than cryptographic proof of physical presence, because device
+location can be unavailable or manipulated on a compromised client.
 
-Browser geolocation is not a cryptographic proof of physical presence. It is useful as a classroom check, but
-device/browser location can be unavailable or manipulated on a compromised client.
+Stored learner data is exposed through Moodle's Privacy API.
