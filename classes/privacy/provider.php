@@ -46,6 +46,14 @@ class provider implements
      * @return collection
      */
     public static function get_metadata(collection $collection): collection {
+        $collection->add_database_table("minute", [
+            "teacheripuserid" => "privacy:metadata:minute:teacheripuserid",
+            "teacherip" => "privacy:metadata:minute:teacherip",
+            "referencelocationuserid" => "privacy:metadata:minute:referencelocationuserid",
+            "referencelat" => "privacy:metadata:minute:referencelat",
+            "referencelon" => "privacy:metadata:minute:referencelon",
+        ], "privacy:metadata:minute");
+
         $collection->add_database_table("minute_responses", [
             "userid" => "privacy:metadata:minute_responses:userid",
             "response" => "privacy:metadata:minute_responses:response",
@@ -68,18 +76,24 @@ class provider implements
      */
     public static function get_contexts_for_userid(int $userid): contextlist {
         $contextlist = new contextlist();
-        $sql = "SELECT ctx.id
+        $sql = "SELECT DISTINCT ctx.id
                   FROM {context} ctx
                   JOIN {course_modules} cm ON cm.id = ctx.instanceid
                   JOIN {modules} m ON m.id = cm.module AND m.name = :modname
                   JOIN {minute} mn ON mn.id = cm.instance
-                  JOIN {minute_responses} r ON r.minuteid = mn.id
+             LEFT JOIN {minute_responses} r ON r.minuteid = mn.id AND r.userid = :responseuserid
                  WHERE ctx.contextlevel = :contextlevel
-                   AND r.userid = :userid";
+                   AND (
+                       r.userid IS NOT NULL
+                       OR mn.teacheripuserid = :teacheripuserid
+                       OR mn.referencelocationuserid = :locationuserid
+                   )";
         $contextlist->add_from_sql($sql, [
             "modname" => "minute",
             "contextlevel" => CONTEXT_MODULE,
-            "userid" => $userid,
+            "responseuserid" => $userid,
+            "teacheripuserid" => $userid,
+            "locationuserid" => $userid,
         ]);
 
         return $contextlist;
@@ -94,6 +108,7 @@ class provider implements
     public static function export_user_data(approved_contextlist $contextlist): void {
         global $DB;
 
+        $userid = $contextlist->get_user()->id;
         foreach ($contextlist->get_contexts() as $context) {
             if (!$context instanceof context_module) {
                 continue;
@@ -104,24 +119,39 @@ class provider implements
                 continue;
             }
 
+            $minute = $DB->get_record("minute", ["id" => $cm->instance], "*", MUST_EXIST);
             $response = $DB->get_record("minute_responses", [
                 "minuteid" => $cm->instance,
-                "userid" => $contextlist->get_user()->id,
+                "userid" => $userid,
             ]);
-            if (!$response) {
-                continue;
+
+            $data = (object)[];
+            if ($response) {
+                $data->response = $response->response;
+                $data->ipaddress = $response->ipaddress;
+                $data->latitude = $response->latitude;
+                $data->longitude = $response->longitude;
+                $data->accuracy = $response->accuracy;
+                $data->timecreated = transform::datetime($response->timecreated);
+                $data->timemodified = transform::datetime($response->timemodified);
             }
 
-            $data = (object)[
-                "response" => $response->response,
-                "ipaddress" => $response->ipaddress,
-                "latitude" => $response->latitude,
-                "longitude" => $response->longitude,
-                "accuracy" => $response->accuracy,
-                "timecreated" => transform::datetime($response->timecreated),
-                "timemodified" => transform::datetime($response->timemodified),
-            ];
-            writer::with_context($context)->export_data([], $data);
+            if ((int)$minute->teacheripuserid === $userid) {
+                $data->teacherip = $minute->teacherip;
+                $data->teacheripuserid = $minute->teacheripuserid;
+            }
+
+            if ((int)$minute->referencelocationuserid === $userid) {
+                $data->referencelat = $minute->referencelat;
+                $data->referencelon = $minute->referencelon;
+                $data->referencelocationuserid = $minute->referencelocationuserid;
+            }
+
+            if ($response
+                || (int)$minute->teacheripuserid === $userid
+                || (int)$minute->referencelocationuserid === $userid) {
+                writer::with_context($context)->export_data([], $data);
+            }
         }
     }
 
@@ -137,10 +167,24 @@ class provider implements
         if (!$context instanceof context_module) {
             return;
         }
+
         $cm = get_coursemodule_from_id("minute", $context->instanceid);
-        if ($cm) {
-            $DB->delete_records("minute_responses", ["minuteid" => $cm->instance]);
+        if (!$cm) {
+            return;
         }
+
+        $DB->delete_records("minute_responses", ["minuteid" => $cm->instance]);
+        $DB->update_record("minute", (object)[
+            "id" => $cm->instance,
+            "requireip" => 0,
+            "teacherip" => "",
+            "teacheripuserid" => null,
+            "requirelocation" => 0,
+            "referencelat" => null,
+            "referencelon" => null,
+            "referencelocationuserid" => null,
+            "timemodified" => time(),
+        ]);
     }
 
     /**
@@ -152,6 +196,7 @@ class provider implements
     public static function delete_data_for_user(approved_contextlist $contextlist): void {
         global $DB;
 
+        $userid = $contextlist->get_user()->id;
         foreach ($contextlist->get_contexts() as $context) {
             if (!$context instanceof context_module) {
                 continue;
@@ -160,8 +205,9 @@ class provider implements
             if ($cm) {
                 $DB->delete_records("minute_responses", [
                     "minuteid" => $cm->instance,
-                    "userid" => $contextlist->get_user()->id,
+                    "userid" => $userid,
                 ]);
+                self::clear_reference_data_for_users($cm->instance, [$userid]);
             }
         }
     }
@@ -181,11 +227,29 @@ class provider implements
         $sql = "SELECT r.userid
                   FROM {minute_responses} r
                   JOIN {course_modules} cm ON cm.instance = r.minuteid
-                  JOIN {modules} m ON m.id = cm.module AND m.name = :modname
-                 WHERE cm.id = :cmid";
+                  JOIN {modules} m ON m.id = cm.module AND m.name = :responsemod
+                 WHERE cm.id = :responsecmid
+                 UNION
+                SELECT mn.teacheripuserid AS userid
+                  FROM {minute} mn
+                  JOIN {course_modules} cm ON cm.instance = mn.id
+                  JOIN {modules} m ON m.id = cm.module AND m.name = :ipmod
+                 WHERE cm.id = :ipcmid
+                   AND mn.teacheripuserid IS NOT NULL
+                 UNION
+                SELECT mn.referencelocationuserid AS userid
+                  FROM {minute} mn
+                  JOIN {course_modules} cm ON cm.instance = mn.id
+                  JOIN {modules} m ON m.id = cm.module AND m.name = :locationmod
+                 WHERE cm.id = :locationcmid
+                   AND mn.referencelocationuserid IS NOT NULL";
         $userlist->add_from_sql("userid", $sql, [
-            "modname" => "minute",
-            "cmid" => $context->instanceid,
+            "responsemod" => "minute",
+            "responsecmid" => $context->instanceid,
+            "ipmod" => "minute",
+            "ipcmid" => $context->instanceid,
+            "locationmod" => "minute",
+            "locationcmid" => $context->instanceid,
         ]);
     }
 
@@ -212,6 +276,45 @@ class provider implements
             [$insql, $params] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
             $params["minuteid"] = $cm->instance;
             $DB->delete_records_select("minute_responses", "minuteid = :minuteid AND userid {$insql}", $params);
+            self::clear_reference_data_for_users($cm->instance, $userids);
+        }
+    }
+
+    /**
+     * Clear teacher reference personal data owned by any of the supplied users.
+     *
+     * @param int $minuteid Activity instance id.
+     * @param int[] $userids User ids.
+     * @return void
+     */
+    private static function clear_reference_data_for_users(int $minuteid, array $userids): void {
+        global $DB;
+
+        $minute = $DB->get_record("minute", ["id" => $minuteid], "*", MUST_EXIST);
+        $userids = array_map("intval", $userids);
+        $update = (object)["id" => $minuteid];
+        $changed = false;
+
+        if ($minute->teacheripuserid !== null
+            && in_array((int)$minute->teacheripuserid, $userids, true)) {
+            $update->requireip = 0;
+            $update->teacherip = "";
+            $update->teacheripuserid = null;
+            $changed = true;
+        }
+
+        if ($minute->referencelocationuserid !== null
+            && in_array((int)$minute->referencelocationuserid, $userids, true)) {
+            $update->requirelocation = 0;
+            $update->referencelat = null;
+            $update->referencelon = null;
+            $update->referencelocationuserid = null;
+            $changed = true;
+        }
+
+        if ($changed) {
+            $update->timemodified = time();
+            $DB->update_record("minute", $update);
         }
     }
 }
