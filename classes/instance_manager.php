@@ -33,13 +33,17 @@ class instance_manager {
      * @return int
      */
     public static function add(stdClass $data): int {
-        global $DB;
+        global $DB, $USER;
 
         $now = time();
         $data->timecreated = $now;
         $data->timemodified = $now;
         $data->teacherip = self::normalise_teacher_ip($data);
         self::normalise_location($data);
+        $data->teacheripuserid = $data->teacherip !== "" ? $USER->id : null;
+        $data->referencelocationuserid = $data->referencelat !== null && $data->referencelon !== null
+            ? $USER->id
+            : null;
 
         return (int)$DB->insert_record("minute", $data);
     }
@@ -51,12 +55,14 @@ class instance_manager {
      * @return bool
      */
     public static function update(stdClass $data): bool {
-        global $DB;
+        global $DB, $USER;
 
+        $current = $DB->get_record("minute", ["id" => $data->instance], "*", MUST_EXIST);
         $data->id = $data->instance;
         $data->timemodified = time();
         $data->teacherip = self::normalise_teacher_ip($data);
         self::normalise_location($data);
+        self::set_reference_owners($data, $current, $USER->id);
 
         return $DB->update_record("minute", $data);
     }
@@ -99,6 +105,40 @@ class instance_manager {
         }
 
         return $ip;
+    }
+
+    /**
+     * Attribute personal reference values to the user who set them.
+     *
+     * @param stdClass $data New form data.
+     * @param stdClass $current Current activity record.
+     * @param int $userid User saving the activity.
+     * @return void
+     */
+    private static function set_reference_owners(stdClass $data, stdClass $current, int $userid): void {
+        if ($data->teacherip === "") {
+            $data->teacheripuserid = null;
+        } else if (empty($current->teacheripuserid) || $data->teacherip !== $current->teacherip) {
+            $data->teacheripuserid = $userid;
+        } else {
+            $data->teacheripuserid = $current->teacheripuserid;
+        }
+
+        $haslocation = $data->referencelat !== null && $data->referencelon !== null;
+        if (!$haslocation) {
+            $data->referencelocationuserid = null;
+            return;
+        }
+
+        $locationchanged = $current->referencelat === null
+            || $current->referencelon === null
+            || (string)$data->referencelat !== (string)$current->referencelat
+            || (string)$data->referencelon !== (string)$current->referencelon;
+        if (empty($current->referencelocationuserid) || $locationchanged) {
+            $data->referencelocationuserid = $userid;
+        } else {
+            $data->referencelocationuserid = $current->referencelocationuserid;
+        }
     }
 
     /**

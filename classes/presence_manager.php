@@ -36,12 +36,16 @@ class presence_manager {
      * @return string New IP.
      */
     public static function capture_ip(stdClass $minute, context_module $context): string {
-        global $DB;
+        global $DB, $USER;
 
         require_capability("mod/minute:viewreport", $context);
         $ip = getremoteaddr();
-        $DB->set_field("minute", "teacherip", $ip, ["id" => $minute->id]);
-        $DB->set_field("minute", "timemodified", time(), ["id" => $minute->id]);
+        $DB->update_record("minute", (object)[
+            "id" => $minute->id,
+            "teacherip" => $ip,
+            "teacheripuserid" => $USER->id,
+            "timemodified" => time(),
+        ]);
 
         return $ip;
     }
@@ -61,7 +65,7 @@ class presence_manager {
         float $latitude,
         float $longitude
     ): void {
-        global $DB;
+        global $DB, $USER;
 
         require_capability("mod/minute:viewreport", $context);
         if ($latitude < -90 || $latitude > 90) {
@@ -71,8 +75,12 @@ class presence_manager {
             throw new moodle_exception("errorlongitude", "mod_minute");
         }
 
-        $DB->set_field("minute", "referencelat", $latitude, ["id" => $minute->id]);
-        $DB->set_field("minute", "referencelon", $longitude, ["id" => $minute->id]);
-        $DB->set_field("minute", "timemodified", time(), ["id" => $minute->id]);
+        $DB->update_record("minute", (object)[
+            "id" => $minute->id,
+            "referencelat" => $latitude,
+            "referencelon" => $longitude,
+            "referencelocationuserid" => $USER->id,
+            "timemodified" => time(),
+        ]);
     }
 }

@@ -29,5 +29,55 @@
  * @return bool
  */
 function xmldb_minute_upgrade($oldversion) {
+    global $DB;
+
+    $dbman = $DB->get_manager();
+
+    if ($oldversion < 2026100501) {
+        $table = new xmldb_table("minute");
+
+        $field = new xmldb_field(
+            "teacheripuserid",
+            XMLDB_TYPE_INTEGER,
+            "10",
+            null,
+            null,
+            null,
+            null,
+            "teacherip"
+        );
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field(
+            "referencelocationuserid",
+            XMLDB_TYPE_INTEGER,
+            "10",
+            null,
+            null,
+            null,
+            null,
+            "referencelon"
+        );
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $key = new xmldb_key("teacheripuser", XMLDB_KEY_FOREIGN, ["teacheripuserid"], "user", ["id"]);
+        $dbman->add_key($table, $key);
+
+        $key = new xmldb_key(
+            "referencelocationuser",
+            XMLDB_KEY_FOREIGN,
+            ["referencelocationuserid"],
+            "user",
+            ["id"]
+        );
+        $dbman->add_key($table, $key);
+
+        upgrade_mod_savepoint(true, 2026100501, "minute");
+    }
+
     return true;
 }
