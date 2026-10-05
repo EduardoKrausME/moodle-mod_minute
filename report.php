@@ -47,7 +47,18 @@ $PAGE->set_context($context);
 
 $groupmode = groups_get_activity_groupmode($cm);
 $currentgroup = $groupmode ? groups_get_activity_group($cm, true) : 0;
-$responses = report_manager::get_responses($minute, $currentgroup);
+$groupfilter = $currentgroup;
+
+if ($groupmode === SEPARATEGROUPS && !has_capability("moodle/site:accessallgroups", $context)) {
+    $allowedgroups = (array)groups_get_activity_allowed_groups($cm);
+    if ($currentgroup > 0) {
+        $groupfilter = isset($allowedgroups[$currentgroup]) ? $currentgroup : [];
+    } else {
+        $groupfilter = array_keys($allowedgroups);
+    }
+}
+
+$responses = report_manager::get_responses($minute, $groupfilter);
 
 if ($download === "csv") {
     $filename = clean_filename($minute->name . "-" . get_string("responses", "mod_minute"));
