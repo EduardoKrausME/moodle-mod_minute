@@ -52,6 +52,45 @@ class restore_minute_activity_structure_step extends restore_activity_structure_
         $oldid = $data->id;
         $data->course = $this->get_courseid();
 
+        if (!empty($data->timestart)) {
+            $data->timestart = $this->apply_date_offset($data->timestart);
+        }
+        if (!empty($data->timeend)) {
+            $data->timeend = $this->apply_date_offset($data->timeend);
+        }
+
+        if (!property_exists($data, "teacherip")) {
+            $data->requireip = 0;
+            $data->teacherip = "";
+            $data->teacheripuserid = null;
+        } else if (!empty($data->teacheripuserid)) {
+            $data->teacheripuserid = $this->get_mappingid("user", $data->teacheripuserid);
+            if (!$data->teacheripuserid) {
+                $data->requireip = 0;
+                $data->teacherip = "";
+                $data->teacheripuserid = null;
+            }
+        } else {
+            $data->teacheripuserid = null;
+        }
+
+        if (!property_exists($data, "referencelat") || !property_exists($data, "referencelon")) {
+            $data->requirelocation = 0;
+            $data->referencelat = null;
+            $data->referencelon = null;
+            $data->referencelocationuserid = null;
+        } else if (!empty($data->referencelocationuserid)) {
+            $data->referencelocationuserid = $this->get_mappingid("user", $data->referencelocationuserid);
+            if (!$data->referencelocationuserid) {
+                $data->requirelocation = 0;
+                $data->referencelat = null;
+                $data->referencelon = null;
+                $data->referencelocationuserid = null;
+            }
+        } else {
+            $data->referencelocationuserid = null;
+        }
+
         $newitemid = $DB->insert_record("minute", $data);
         $this->apply_activity_instance($newitemid);
         $this->set_mapping("minute", $oldid, $newitemid, true);

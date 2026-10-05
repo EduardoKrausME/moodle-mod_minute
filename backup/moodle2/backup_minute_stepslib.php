@@ -30,7 +30,7 @@ class backup_minute_activity_structure_step extends backup_activity_structure_st
     protected function define_structure() {
         $userinfo = $this->get_setting_value("userinfo");
 
-        $minute = new backup_nested_element("minute", ["id"], [
+        $minutefields = [
             "name",
             "intro",
             "introformat",
@@ -39,14 +39,20 @@ class backup_minute_activity_structure_step extends backup_activity_structure_st
             "timeend",
             "maxchars",
             "requireip",
-            "teacherip",
             "requirelocation",
-            "referencelat",
-            "referencelon",
             "radiusmeters",
             "timecreated",
             "timemodified",
-        ]);
+        ];
+        if ($userinfo) {
+            $minutefields[] = "teacherip";
+            $minutefields[] = "teacheripuserid";
+            $minutefields[] = "referencelat";
+            $minutefields[] = "referencelon";
+            $minutefields[] = "referencelocationuserid";
+        }
+
+        $minute = new backup_nested_element("minute", ["id"], $minutefields);
 
         $responses = new backup_nested_element("responses");
         $response = new backup_nested_element("response", ["id"], [
@@ -69,6 +75,10 @@ class backup_minute_activity_structure_step extends backup_activity_structure_st
         }
 
         $response->annotate_ids("user", "userid");
+        if ($userinfo) {
+            $minute->annotate_ids("user", "teacheripuserid");
+            $minute->annotate_ids("user", "referencelocationuserid");
+        }
 
         return $this->prepare_activity_structure($minute);
     }

@@ -39,6 +39,18 @@ class response_submitted extends base {
     }
 
     /**
+     * Map response object ids during course log restore.
+     *
+     * @return array
+     */
+    public static function get_objectid_mapping() {
+        return [
+            "db" => "minute_responses",
+            "restore" => "minute_response",
+        ];
+    }
+
+    /**
      * Event name.
      *
      * @return string
