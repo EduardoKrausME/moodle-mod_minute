@@ -108,7 +108,7 @@ class provider implements
     public static function export_user_data(approved_contextlist $contextlist): void {
         global $DB;
 
-        $userid = $contextlist->get_user()->id;
+        $userid = (int)$contextlist->get_user()->id;
         foreach ($contextlist->get_contexts() as $context) {
             if (!$context instanceof context_module) {
                 continue;
@@ -196,7 +196,7 @@ class provider implements
     public static function delete_data_for_user(approved_contextlist $contextlist): void {
         global $DB;
 
-        $userid = $contextlist->get_user()->id;
+        $userid = (int)$contextlist->get_user()->id;
         foreach ($contextlist->get_contexts() as $context) {
             if (!$context instanceof context_module) {
                 continue;

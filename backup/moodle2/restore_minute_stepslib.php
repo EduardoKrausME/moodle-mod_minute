@@ -71,6 +71,8 @@ class restore_minute_activity_structure_step extends restore_activity_structure_
                 $data->teacheripuserid = null;
             }
         } else {
+            $data->requireip = 0;
+            $data->teacherip = "";
             $data->teacheripuserid = null;
         }
 
@@ -88,6 +90,9 @@ class restore_minute_activity_structure_step extends restore_activity_structure_
                 $data->referencelocationuserid = null;
             }
         } else {
+            $data->requirelocation = 0;
+            $data->referencelat = null;
+            $data->referencelon = null;
             $data->referencelocationuserid = null;
         }
 
