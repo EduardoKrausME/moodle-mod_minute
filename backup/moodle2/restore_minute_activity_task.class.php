@@ -56,6 +56,17 @@ class restore_minute_activity_task extends restore_activity_task {
     }
 
     /**
+     * Define contents that need link decoding.
+     *
+     * @return restore_decode_content[]
+     */
+    public static function define_decode_contents() {
+        return [
+            new restore_decode_content("minute", ["intro"], "minute"),
+        ];
+    }
+
+    /**
      * Define restore log rules.
      *
      * @return restore_log_rule[]
