@@ -24,8 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-$plugin->version = 2026100600;
-$plugin->release = '1.1.7';
+$plugin->version = 2026101200;
+$plugin->release = '1.1.8';
 $plugin->component = "mod_minute";
 $plugin->requires = 2024100700;
 $plugin->maturity = MATURITY_STABLE;
