@@ -17,7 +17,6 @@
 namespace mod_minute;
 
 use context_module;
-use core_text;
 use mod_minute\event\response_submitted;
 use mod_minute\event\response_updated;
 use moodle_exception;
@@ -62,7 +61,7 @@ class submission_manager {
         if ($response === "") {
             throw new moodle_exception("responseempty", "mod_minute");
         }
-        if (core_text::strlen($response) > (int)$minute->maxchars) {
+        if (strlen($response) > (int)$minute->maxchars) {
             throw new moodle_exception("responsetoolong", "mod_minute", "", (int)$minute->maxchars);
         }
 
